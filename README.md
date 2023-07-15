@@ -358,3 +358,4 @@ int main(int argc, char* argv[])
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/method.png)  
 如图中所示，“**xargs**”命令执行的时候“**argv[]**”数组是上面一行的情况，我的做法是将后面的字符串向前拷贝一格，然后最后的位置留给“**输入参数**”（这里也就是文件名）。  
 实验结果为：  
+![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/xargs2.png)
