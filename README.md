@@ -124,7 +124,7 @@ int main()
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pingpong.png)  
 
 **3.** primes (moderate/hard)  
-实验内容是：通过“**pipe**”和“**fork**”，完成“**埃氏筛**”的过程，筛选2~35中的质数，如下图所示：  
+实验内容是：通过“**pipe()**”和“**fork()**”系统调用，完成“**埃氏筛**”的过程，筛选2~35中的质数，如下图所示：  
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/aishishai.png)  
 需要注意的就是文件描述符数量有限，进程中要及时关掉用不到的文件描述符。  
 另外，从实验的提示中大致可以看到“**递归**”的影子。  
