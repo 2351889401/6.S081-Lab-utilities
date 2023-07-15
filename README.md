@@ -124,3 +124,68 @@ int main()
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pingpong.png)  
 
 **3.** primes (moderate/hard)  
+实验内容是：通过“**pipe**”和“**fork**”，完成“**埃氏筛**”的过程，如下图所示：  
+
+
+```
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
+
+void hey_its_you(int* x, int n) {
+    if(n == 1) {
+        printf("prime %d\n", x[0]);
+        return;
+    }
+
+    printf("prime %d\n", x[0]);
+
+    //从剩余(n-1)个数中筛选掉 "%x[0] == 0" 的数
+    int i, j;
+    j = 0;
+    int now = x[0];
+    for(i=1; i<n; i++) {
+        if(x[i] % now == 0) continue;
+        x[j++] = x[i];
+    }
+    //最终j表示剩余的个数
+
+    int p[2];
+    pipe(p);
+
+    int pid;
+    pid = fork();
+    if(!pid) {
+        //子进程
+        close(0);
+        dup(p[0]);
+        close(p[0]);
+        close(p[1]); //子进程由于会进行下一次的递归 所以需要把用不到的文件描述符释放掉 减少资源的占用
+        read(0, x, j*4); 
+
+        hey_its_you(x, j);
+        exit(0);
+    }
+
+    //主进程将剩余数据write到管道里给子进程
+    close(1);
+    dup(p[1]);
+    close(p[1]);
+    close(p[0]);//主进程不从新生成的管道读 只向新管道里面写
+    write(1, x, j*4);
+    wait((int*)0);
+}
+
+int main()
+{
+    int i;
+    int n = 0;
+    int a[35];
+    for(i=2; i<=35; i++) {
+        a[i-2] = i;
+        n++;
+    }
+    hey_its_you(a, n);
+    exit(0);
+}
+```
