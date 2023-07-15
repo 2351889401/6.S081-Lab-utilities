@@ -15,21 +15,8 @@ may be a command that itself includes a pipe (e.g., 'a | b | c'), which itself f
 processes (one for 'b' and one for 'c'). Thus, the shell may create a tree of processes. The leaves
 of this tree are commands and the interior nodes are processes that wait until the left and right
 children complete.
-
-In principle, one could have the interior nodes run the left end of a pipeline, but doing so
-correctly would complicate the implementation. Consider making just the following modification: 
-change 'sh.c' to not fork for 'p->left' and run 'runcmd(p->left)' in the interior process. 
-Then, for example, 'echo hi | wc' won’t produce output, because when 'echo hi' exits
-in 'runcmd', the interior process exits and never calls fork to run the right end of the pipe. This
-incorrect behavior could be fixed by not calling 'exit' in 'runcmd' for interior processes, but this
-fix complicates the code: now 'runcmd' needs to know if it a interior process or not. Complications
-also arise when not forking for 'runcmd(p->right)'. For example, with just that modification,
-'sleep 10 | echo hi' will immediately print “hi” instead of after 10 seconds, because 'echo'
-runs immediately and exits, not waiting for 'sleep' to finish. Since the goal of the 'sh.c' is to be as
-simple as possible, it doesn’t try to avoid creating interior processes.
 ```
-  
-上面第一段是说**xv6**中“**shell**”程序（**user/sh.c**）中管道的实现方式：进程创建管道，然后使用“**fork**”创建左子进程和右子进程，等待这2个进程执行完，以这种方式保证管道命令执行的顺序性。  
+上面段是说**xv6**中“**shell**”程序（**user/sh.c**）中管道的实现方式：进程创建管道，然后使用“**fork**”创建左子进程和右子进程，等待这2个进程执行完，以这种方式保证管道命令执行的顺序性。  
 为什么这样可以保证管道命令的顺序性呢？
 ```
 case PIPE:
@@ -61,4 +48,73 @@ case PIPE:
 图示如下：  
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pipe1.png)  
   
-而第一段中提到的由管道命令引起的进程树（**tree of processes**）是下面这个样子的：  
+而段中提到的由管道命令引起的进程树（**tree of processes**）是下面这个样子的：  
+![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pipe2.png)  
+图中的红色虚线是数据的流向，也是管道命令的执行顺序。  
+  
+下面开始正式的实验内容。  
+**1.** sleep (easy)  
+内容比较简单，就是让进程通过“**sleep()**”系统调用停顿一段时间。  
+```
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
+
+int main(int argc, char * argv[]) {
+    if(argc < 2) {
+        fprintf(2, "Usage: sleep seconds...\n");
+        exit(1);
+    }
+    int i;
+    i = atoi(argv[1]);
+    sleep(i);
+    exit(0);
+}
+```
+  
+**2.** pingpong (easy)  
+实验内容是：通过“**fork()**”创建子进程。利用“**pipe**”创建管道，父进程和子进程得以通信，输出信息。  
+具体流程就是：父进程先发送一字节的数据，子进程接收，输出信息；子进程发送一字节的数据，父进程接收，输出信息。  
+```
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
+
+int main()
+{
+    char buf[10];
+    buf[0] = 'a';
+
+    int p[2];
+    pipe(p); //p[0]为读端口 p[1]为写端口
+
+    //要求 父进程发送一个字节数据 子进程接收到 输出信息
+    //之后 子进程向父进程发送一个字节数据 父进程收到 输出信息
+    int n;
+    int pid;
+    pid = fork();
+
+    if(!pid) {//子进程
+        if((n = read(p[0], buf+1, 1)) < 1) {
+            fprintf(1, "childpid %d: read failed\n", getpid());
+            exit(1);
+        }
+        printf("%d: received ping\n", getpid());
+        write(p[1], buf+1, 1);
+        close(p[0]);
+        close(p[1]);
+        exit(0);
+    }
+    write(p[1], buf, 1);
+    wait((int*)0); //通过wait()语句控制子进程完成上面的流程 此时父进程可以接收了
+    if((n = read(p[0], buf+2, 1)) < 1) {
+        fprintf(1, "parentpid %d: read failed\n", getpid());
+        exit(1);
+    }
+    printf("%d: received pong\n", getpid());
+    close(p[0]);
+    close(p[1]);
+    exit(0);
+}
+```
+实验结果：  
