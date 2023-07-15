@@ -48,7 +48,7 @@ case PIPE:
 图示如下：  
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pipe1.png)  
   
-而段中提到的由管道命令引起的进程树（**tree of processes**）是下面这个样子的：  
+而上面的文段中提到的由管道命令引起的进程树（**tree of processes**）是下面这个样子的：  
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pipe2.png)  
 图中的红色虚线是数据的流向，也是管道命令的执行顺序。  
 
