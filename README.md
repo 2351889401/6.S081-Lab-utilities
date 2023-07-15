@@ -17,7 +17,7 @@ of this tree are commands and the interior nodes are processes that wait until t
 children complete.
 ```
 上面这段是说**xv6**的“**shell**”程序（**user/sh.c**）中管道命令的实现方式：进程创建管道，然后使用“**fork**”创建左子进程和右子进程，等待这2个进程执行完，以这种方式保证管道命令执行的顺序性。  
-为什么这样可以保证管道命令的顺序性呢？
+为什么这样可以保证管道命令的顺序性呢？**shell**程序中管道命令的执行代码如下：
 ```
 case PIPE:
     pcmd = (struct pipecmd*)cmd;
