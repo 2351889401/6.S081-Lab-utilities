@@ -6,24 +6,24 @@
 
 在正式开始实验前，先分享书上第一章我认为较难理解的部分，并画出一些图来帮助理解，欢迎大家批评指正。
 ```
-The xv6 shell implements pipelines such as grep fork sh.c | wc -l in a manner similar
+The xv6 shell implements pipelines such as 'grep fork sh.c | wc -l' in a manner similar
 to the above code (user/sh.c:100). The child process creates a pipe to connect the left end of the
-pipeline with the right end. Then it calls fork and runcmd for the left end of the pipeline and
-fork and runcmd for the right end, and waits for both to finish. The right end of the pipeline
-may be a command that itself includes a pipe (e.g., a | b | c), which itself forks two new child
-processes (one for b and one for c). Thus, the shell may create a tree of processes. The leaves
+pipeline with the right end. Then it calls 'fork' and 'runcmd' for the left end of the pipeline and
+'fork' and 'runcmd' for the right end, and waits for both to finish. The right end of the pipeline
+may be a command that itself includes a pipe (e.g., 'a | b | c'), which itself forks two new child
+processes (one for 'b' and one for 'c'). Thus, the shell may create a tree of processes. The leaves
 of this tree are commands and the interior nodes are processes that wait until the left and right
 children complete.
 
 In principle, one could have the interior nodes run the left end of a pipeline, but doing so
 correctly would complicate the implementation. Consider making just the following modification: 
-change sh.c to not fork for p->left and run runcmd(p->left) in the interior process. 
-Then, for example, echo hi | wc won’t produce output, because when echo hi exits
-in runcmd, the interior process exits and never calls fork to run the right end of the pipe. This
-incorrect behavior could be fixed by not calling exit in runcmd for interior processes, but this
-fix complicates the code: now runcmd needs to know if it a interior process or not. Complications
-also arise when not forking for runcmd(p->right). For example, with just that modification,
-sleep 10 | echo hi will immediately print “hi” instead of after 10 seconds, because echo
-runs immediately and exits, not waiting for sleep to finish. Since the goal of the sh.c is to be as
+change 'sh.c' to not fork for 'p->left' and run 'runcmd(p->left)' in the interior process. 
+Then, for example, 'echo hi | wc' won’t produce output, because when 'echo hi' exits
+in 'runcmd', the interior process exits and never calls fork to run the right end of the pipe. This
+incorrect behavior could be fixed by not calling 'exit' in 'runcmd' for interior processes, but this
+fix complicates the code: now 'runcmd' needs to know if it a interior process or not. Complications
+also arise when not forking for 'runcmd(p->right)'. For example, with just that modification,
+'sleep 10 | echo hi' will immediately print “hi” instead of after 10 seconds, because 'echo'
+runs immediately and exits, not waiting for 'sleep' to finish. Since the goal of the 'sh.c' is to be as
 simple as possible, it doesn’t try to avoid creating interior processes.
 ```
