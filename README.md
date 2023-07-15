@@ -125,8 +125,10 @@ int main()
 
 **3.** primes (moderate/hard)  
 实验内容是：通过“**pipe**”和“**fork**”，完成“**埃氏筛**”的过程，如下图所示：  
-
-
+![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/aishishai.png)  
+需要注意的就是文件描述符数量有限，进程中要及时关掉用不到的文件描述符。  
+另外，从实验的提示中大致可以看到“**递归**”的影子。  
+当时写的时候好像思考了蛮久，这里就直接展示代码了。
 ```
 #include "kernel/types.h"
 #include "kernel/stat.h"
@@ -189,3 +191,4 @@ int main()
     exit(0);
 }
 ```
+实验结果为：  
