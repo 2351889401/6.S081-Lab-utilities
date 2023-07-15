@@ -278,4 +278,80 @@ int main(int argc, char* argv[])
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/xargs1.png)  
 图中管道的输入为“**11m22m33**”，“**-d**”表示后面的字符为分隔符，“**-n**”表示分割之后每一批次传入的参数量，图中是一次传入2个，送给最后的“**echo**”命令，所以会有图中的输出。  
 
-本次
+本次实验不需要像“**Linux**”中这样的优化，只需要每次读入一个参数（读到**“\n”**）即可。  
+实验测试的脚本命令如下（**xargstest.sh**）：  
+  
+```
+mkdir a
+echo hello > a/b
+mkdir c
+echo hello > c/b
+echo hello > b
+find . b | xargs grep hello
+
+```
+  
+“**find**”命令的实现是**4**中实现的。  
+实际上可以看到，通过管道传递给“**xargs**”命令的参数应该是
+```
+./a/b
+./c/b
+./b
+```
+  
+“**xargs**”从标准输入（这时的标准输入当然是管道的写端口了）每次读入一个参数（就是一个文件路径），后续的行为应该是什么？  
+应该是创建子进程，让子进程通过“**exec()**”去执行“**grep hello 文件路径**”操作。所以代码如下，一些问题记录在了注释里面：  
+```
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
+
+//read是在一个文件描述符里面进行连续读 读到最后返回0
+//本次任务要求read读到换行'\n'退出
+
+char buf[512];
+
+int my_gets(char* p, int fd) { //从fd读取数据到p位置 返回读取的字符数 读到'\n'为止
+    int i;
+    i = 0;
+    char c;
+
+    while(1) {
+        int now;
+        now = read(fd, &c, 1);
+        if(now == 0 || c == '\n') break;
+        p[i] = c;
+        i++;
+    }
+    p[i] = 0;
+    // printf("read %s\n", p);
+    return i;
+}
+
+void do_xargs(int argc, char *argv[], int fd) {
+    //从文件描述符读取参数 生成子进程 子进程exec
+    int i, n;
+    for(i=0; i<argc-1; i++) { //这里的参数移位操作是什么意义呢 参考下面的解释和图
+        strcpy(argv[i], argv[i+1]);
+    }
+
+    int pid;
+    while((n = my_gets(buf, fd)) > 0) {
+        pid = fork();
+        if(!pid) {
+            strcpy(argv[argc-1], buf);
+            exec(argv[0], argv);
+            fprintf(2, "exec %s failed\n", argv[0]);
+            exit(0);
+        }
+        wait((int*)0);
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    do_xargs(argc, argv, 0);
+    exit(0);
+}
+```
+上述代码中涉及到参数的移位，为什么呢？当时做的时候好像“**argv[]**”数组的申请有点问题，后来就想了个办法：原始参数肯定需要“**argv[]**”数组的，那为什么不在原始参数的基础上修改呢？  
