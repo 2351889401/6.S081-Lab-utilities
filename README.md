@@ -16,7 +16,7 @@ processes (one for 'b' and one for 'c'). Thus, the shell may create a tree of pr
 of this tree are commands and the interior nodes are processes that wait until the left and right
 children complete.
 ```
-上面段是说**xv6**中“**shell**”程序（**user/sh.c**）中管道命令的实现方式：进程创建管道，然后使用“**fork**”创建左子进程和右子进程，等待这2个进程执行完，以这种方式保证管道命令执行的顺序性。  
+上面这段是说**xv6**中“**shell**”程序（**user/sh.c**）中管道命令的实现方式：进程创建管道，然后使用“**fork**”创建左子进程和右子进程，等待这2个进程执行完，以这种方式保证管道命令执行的顺序性。  
 为什么这样可以保证管道命令的顺序性呢？
 ```
 case PIPE:
