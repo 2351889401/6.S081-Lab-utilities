@@ -52,10 +52,10 @@ case PIPE:
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pipe2.png)  
 图中的红色虚线是数据的流向，也是管道命令的执行顺序。  
 
-
+## 
 
   
-下面开始正式的实验内容。  
+**下**面开始正式的实验内容。  
 **1.** sleep (easy)  
 内容比较简单，就是让进程通过“**sleep()**”系统调用停顿一段时间。  
 ```
