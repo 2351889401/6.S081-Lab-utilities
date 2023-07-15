@@ -51,6 +51,9 @@ case PIPE:
 而段中提到的由管道命令引起的进程树（**tree of processes**）是下面这个样子的：  
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pipe2.png)  
 图中的红色虚线是数据的流向，也是管道命令的执行顺序。  
+
+
+
   
 下面开始正式的实验内容。  
 **1.** sleep (easy)  
@@ -118,3 +121,6 @@ int main()
 }
 ```
 实验结果：  
+![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pingpong.png)  
+
+**3.** 
