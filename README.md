@@ -271,3 +271,7 @@ int main(int argc, char* argv[])
 }
 ```
 实验结果为：  
+![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/find.png)  
+
+**5.** xargs (moderate)  
+**Linux**下的 “**xargs**” 命令常与 “**|**” 连起来用，起到的作用是“**从管道中读取输入数据，并进行一定程度的处理（分割、分批），然后传递给后面的命令**”，如下图所示：  
