@@ -55,7 +55,7 @@ case PIPE:
 ## 
 
   
-**下**面开始正式的实验内容。  
+下面开始正式的实验内容。  
 **1.** sleep (easy)  
 内容比较简单，就是让进程通过“**sleep()**”系统调用停顿一段时间。  
 ```
@@ -123,4 +123,4 @@ int main()
 实验结果：  
 ![](https://github.com/2351889401/6.S081-Lab-utilities/blob/main/images/pingpong.png)  
 
-**3.** 
+**3.** primes (moderate/hard)  
